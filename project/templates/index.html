@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Problem Solver</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Math Problem Solver</h1>
+
+        <!-- Problem Input Section -->
+        <div class="input-section">
+            <label for="problem">Enter Problem:</label>
+            <textarea id="problem" name="problem" placeholder="Enter your math problem here..." required></textarea>
+            <div id="problem-preview" class="preview-box"></div>
+        </div>
+
+        <!-- Solution Input Section -->
+        <div class="input-section">
+            <label for="solution">Enter Solution:</label>
+            <textarea id="solution" name="solution" placeholder="Enter the solution to your problem here..."></textarea>
+            <div id="solution-preview" class="preview-box"></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-section">
+            <button id="submit-model" onclick="submitToModel()">Submit to Model</button>
+            <button id="solve-model" onclick="solveWithModel()">Have Model Solve This</button>
+        </div>
+    </div>
+
+    <script>
+        // Update preview for problem input
+        document.getElementById('problem').addEventListener('input', function() {
+            const preview = document.getElementById('problem-preview');
+            preview.innerHTML = `\\[${this.value}\\]`;
+            MathJax.typesetPromise([preview]);
+        });
+
+        // Update preview for solution input
+        document.getElementById('solution').addEventListener('input', function() {
+            const preview = document.getElementById('solution-preview');
+            preview.innerHTML = `\\[${this.value}\\]`;
+            MathJax.typesetPromise([preview]);
+        });
+
+        function submitToModel() {
+            const problem = document.getElementById('problem').value;
+            const solution = document.getElementById('solution').value;
+
+            fetch('/submit_problem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ problem, solution })
+            }).then(response => response.text())
+              .then(data => alert(data))
+              .catch(error => console.error('Error:', error));
+        }
+
+        function solveWithModel() {
+            const problem = document.getElementById('problem').value;
+
+            fetch('/solve_problem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ problem })
+            }).then(response => response.json())
+              .then(data => alert(`Solution: ${data.solution}`))
+              .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
